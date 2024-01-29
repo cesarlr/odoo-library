@@ -31,5 +31,6 @@
         "views/library_menu.xml",
         "views/book_view.xml",
         "views/book_list_template.xml",
+        "data/book_demo.xml",
     ]
 }
