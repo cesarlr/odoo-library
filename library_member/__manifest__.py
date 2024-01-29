@@ -12,5 +12,7 @@
         "views/library_menu.xml",
         "views/member_view.xml",
         "views/book_list_template.xml",
+        "data/res.partner.csv",
+        "data/library.book.csv",
     ],
 }
