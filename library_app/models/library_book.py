@@ -71,7 +71,7 @@ class Book(models.Model):
         digits = [int(letter) for letter in self.isbn if letter.isdigit()]
         remain = sum(a*b for a,b in zip(digits[:12], ponderations)) % 10
         check = 10 - remain if remain != 0 else 0
-        return digits[-1] == check
+        return digits and digits[-1] == check
 
     def button_check_isbn(self):
         for book in self:
