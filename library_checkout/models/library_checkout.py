@@ -14,7 +14,10 @@ class Checkout(models.Model):
             default=lambda s: s.env.user,
     )
     request_date = fields.Date(
-            default=lambda s: fields.Date.today()
+            default=lambda s: fields.Date.today(),
+            compute="_compute_request_date_onchange",
+            store=True,
+            readonly=False
     )
     line_ids = fields.One2many(
             "library.checkout.line",
@@ -68,8 +71,20 @@ class Checkout(models.Model):
         # values
         return True
 
-    @api.onchange("member_id")
-    def onchange_member_id(self):
+    # @api.onchange("member_id")
+    # def onchange_member_id(self):
+    #     today_date = fields.Date.today()
+    #     if self.request_date != today_date:
+    #         self.request_date = today_date
+    #         return {
+    #                 "warning": {
+    #                     "title": "Changed Request Date",
+    #                     "message": "Request date changed to today!",
+    #                     }
+    #                 }
+    
+    @api.depends("member_id")
+    def _compute_request_date_changed(self):
         today_date = fields.Date.today()
         if self.request_date != today_date:
             self.request_date = today_date

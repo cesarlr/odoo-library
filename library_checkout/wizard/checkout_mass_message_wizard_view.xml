@@ -10,7 +10,7 @@
 					<field name="checkout_ids" />
 				</group>
 				<footer>
-					<!-- <button type="object" name="button_send" string="Send Messages" /> -->
+					<button type="object" name="button_send" string="Send Messages" />
 					<button special="cancel" string="Cancel" class="btn-secondary" />
 				</footer>
 			</form>
