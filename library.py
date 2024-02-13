@@ -1,18 +1,35 @@
-import xmlrpc.client
-class LibraryAPI():
-    def __init__(self, host, port, db, user, pwd):
-        common = xmlrpc.client.ServerProxy("http://%s:%d/xmlrpc/2/common" % (host, port))
-        self.api = xmlrpc.client.ServerProxy("http://%s:%d/xmlrpc/2/object" % (host, port))
-        self.uid = common.authenticate(db, user, pwd, {})
-        self.pwd = pwd
-        self.db = db
-        self.model = "library.book"
+#!/usr/bin/env python3
 
-    def search_read(title):
-        pass
-    def create(title):
-        pass
-    def write(id, title):
-        pass
-    def unlink(id):
-        pass
+from argparse import ArgumentParser
+from library_odoorpc import LibraryAPI
+
+parser = ArgumentParser()
+parser.add_argument("command", choices=["list", "add", "set", "del"])
+parser.add_argument("params", nargs="*") # optional args
+args = parser.parse_args()
+host, port, db = "localhost", 8069, "library"
+user, pwd = "admin", "admin"
+api = LibraryAPI(host, port, db, user, pwd)
+if args.command == "list":
+    title = args.params[:1]
+    books = api.search_read(title)
+    for book in books:
+        print("%(id)d %(name)s" % book)
+
+if args.command == "add":
+    title = args.params[0]
+    book_id = api.create(title)
+    print("Book added with ID %d for title %s." % (book_id, title))
+
+if args.command == "set":
+    if len(args.params) != 2:
+        print("set command requires an Title and a ID")
+    else:
+        book_id, title = int(args.params[0]), args.params[1]
+        api.write(book_id, title)
+        print("Title of Book ID %d set to %s" % (book_id, title))
+
+if args.command == "del":
+    book_id = int(args.params[0])
+    api.unlink(book_id)
+    print("Book with ID %s was deleted." % book_id)

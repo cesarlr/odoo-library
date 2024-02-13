@@ -26,7 +26,29 @@ class Checkout(models.Model):
     )
     checkout_date = fields.Date(readonly=True)
     close_date = fields.Date(readonly=True)
+    count_checkouts = fields.Integer(
+            compute="_compute_count_checkouts")
 
+    def _compute_count_checkouts_DISABLED(self):
+        for checkout in self:
+            domain = [
+                    ("member_id", "=", checkout.member_id.id),
+                    ("state", "not in", ["done", "cancel"]),
+                    ]
+            checkout.count_checkouts = self.search_count(domain)
+
+    def _compute_count_checkouts(self):
+        members = self.mapped('member_id')
+        domain = [
+                ('member_id', 'in', members.ids),
+                ('stage', 'not in', ["done", "cancel"]),
+                ]
+        raw = self.read_group(domain, ["id:count"], ["member_id"])
+        data = {
+                x["member_id"][0]:x["member_id_count"] for x in raw
+                }
+        for checkout in self:
+            self.count_checkouts = data.get(checkout.member_id.id, 0)
     @api.model
     def _default_stage_id(self):
         Stage = self.env["library.checkout.stage"]
@@ -43,6 +65,9 @@ class Checkout(models.Model):
     )
     state = fields.Selection(related="stage_id.state")
     
+    name = fields.Char(string="Title")
+    member_image = fields.Binary(related="member_id.image_128")
+
     @api.model
     def create(self, vals):
         # Code before create: should use the 'vals' dict
@@ -94,3 +119,10 @@ class Checkout(models.Model):
                         "message": "Request date changed to today!",
                         }
                     }
+    def button_done(self):
+        Stage = self.env['library.checkout.stage']
+        done_stage = Stage.search([('state', '=', 'done')],
+                                  limit=1)
+        for checkout in self:
+            checkout.stage_id = done_stage
+        return True
