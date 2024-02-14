@@ -1,11 +1,6 @@
 <odoo>
-	<record id="rule_library_member_own_activities" model="ir.rule">
-		<field name="name">Library Member only sees own activities</field>
-		<field name="model_id" ref="model_library_member" />
-		<field name="domain_force">[('message_partner_ids','in',[user.partner_id.id])]</field>
-	</record>
-	<!-- Modify Group name -->
-	<record id="library_app.library_group_user" model="res.groups">
-		<field name="name">Librarian</field>
-	</record>
+  <!-- Modify Group name -->
+  <record id="library_app.library_group_user" model="res.groups"> 
+    <field name="name">Librarian</field>
+  </record>
 </odoo>
