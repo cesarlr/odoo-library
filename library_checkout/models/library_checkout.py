@@ -6,6 +6,18 @@ class Checkout(models.Model):
     _description = "Checkout Request"
     _inherit = ["mail.thread", "mail.activity.mixin"]
 
+    kanban_state = fields.Selection(
+    [("normal", "In progress"),
+     ("blocked", "Blocked"),
+     ("done", "Ready for next stage")],
+    "Kanban State",
+    default="normal")
+    priority = fields.Selection(
+            [("0", "High"),
+             ("1", "Very High"),
+             ("2", "Critical")],
+            default="0")
+
     @api.depends('member_id')
     def _compute_request_date_onchange(self):
         today_date = fields.Date.today()
@@ -58,6 +70,8 @@ class Checkout(models.Model):
     count_checkouts = fields.Integer(
         compute="_compute_count_checkouts")
 
+    color = fields.Integer()
+
     def _compute_count_checkouts_DISABLED(self):
         "Naive version, not performance optimal"
         for checkout in self:
@@ -98,6 +112,9 @@ class Checkout(models.Model):
         return new_record
 
     def write(self, vals):
+        # reset kanban state when changing stage
+        if "stage_id" in vals and "kanban_state" not in vals:
+            vals["kanban_state"] = "normal"
         # Code before write: `self` has the old values
         old_state = self.stage_id.state
         super().write(vals)
